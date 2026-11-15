@@ -1,0 +1,144 @@
+<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kinoabend bei Mia</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f0f2f7;color:#202439;font:17px system-ui,sans-serif}button,input{font:inherit}button{cursor:pointer;border:0;border-radius:12px;background:#e8eefc;color:#183674;padding:.65rem .9rem;font-weight:700}button:hover,button[aria-pressed=true]{background:#c9dcff}button:disabled{opacity:.45;cursor:default}:focus-visible{outline:3px solid #235ed0;outline-offset:3px}header{background:#fff;padding:1rem 4vw;display:flex;align-items:center;justify-content:space-between;gap:.7rem;position:sticky;top:0;z-index:2;border-bottom:1px solid #d7dce9}main{max-width:1280px;margin:auto;padding:1rem 3vw}h1,h2,h3,p{margin:.45em 0}.tabletop{margin:1rem 0;padding:clamp(1rem,5vw,4rem);border-radius:28px;background:repeating-linear-gradient(5deg,#aa6343 0,#b77355 20px,#b36b4c 23px,#bb795b 45px);display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}.item{min-height:180px;background:#fff8e9;box-shadow:0 9px 17px #54251170}.item span{display:block;font-size:3.4rem}.done{color:#176341}.layout{display:grid;grid-template-columns:1.3fr 1fr;gap:1rem;align-items:start}.graphic{position:sticky;top:84px}.card,figure{background:white;margin:0 0 1rem;padding:1rem;border-radius:16px;box-shadow:0 2px 9px #25386313}.card fieldset{border:0;padding:0;margin:1rem 0}.card legend{font-weight:700}.choices{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}.status{min-height:1.5em;color:#334765}.status.good{color:#176341}svg{width:100%;height:auto}figcaption,small{font-size:.85rem;color:#46526b}input{max-width:9rem;padding:.45rem;border:1px solid #7586aa;border-radius:7px}label{display:block;margin:.45rem 0}.tools{display:flex;gap:.5rem;flex-wrap:wrap}dialog{width:min(95vw,960px);border:0;border-radius:16px}dialog::backdrop{background:#15223e99}@media(max-width:760px){.layout{display:block}.graphic{position:static}.tabletop{grid-template-columns:1fr 1fr}.item{min-height:124px}header{font-size:.88rem}.item span{font-size:2.6rem}}@media print{header,button,.tools,.tabletop{display:none!important}.layout{display:block}.graphic{position:static}.card{break-inside:avoid}}
+</style>
+<header id="nav"></header><main id="app"></main><dialog id="zoom"></dialog>
+<script>
+'use strict';
+const diagramTypes=['Balkendiagramm','Säulendiagramm','Kreisdiagramm','Liniendiagramm'];
+const palette=['#235ac5','#bd5819','#19785e','#8349ae','#ad3079','#52657e'];
+const years=['2015','2024','2025'];
+const choice=(prompt,options,answer,hint,explanation)=>({prompt,options,answer,hint,explanation});
+const yes=(prompt,answer,hint,explanation)=>choice(prompt,['Ja','Nein'],answer?'Ja':'Nein',hint,explanation);
+const calc=(prompt,labels,answer,formula,hint,explanation)=>({prompt,labels,answer,formula,hint,explanation});
+const stations=[
+ {object:'Chipstüte',emoji:'🍟',title:'Wofür wurde 2024 Geld ausgegeben?',year:'2024',unit:'Mrd. €',labels:['Kleidung und Mode','Getränke','Hobbys','Fahrrad, Mofa, Moped','Körper- und Haarpflege'],values:[3.2,1.4,1.3,1.3,1.1],
+ statements:[yes('Für Getränke und Hobbys wurde gleich viel ausgegeben.',false,'Vergleiche die Zahlen an den beiden Balken.','Getränke: 1,4 Mrd. €. Hobbys: 1,3 Mrd. €.'),yes('Der Balken für Kleidung und Mode ist am längsten.',true,'Suche den längsten Balken.','Kleidung und Mode liegt mit 3,2 Mrd. € vorn.')],
+ multiple:choice('Welcher der folgenden Posten hat denselben Wert wie Hobbys?',['Getränke','Kleidung und Mode','Fahrrad, Mofa, Moped'],'Fahrrad, Mofa, Moped','Suche einen weiteren Balken mit 1,3 Mrd. €.','Beide Posten liegen bei 1,3 Mrd. €.'),
+ maths:calc('Wie hoch waren die Ausgaben für Getränke und Hobbys zusammen?',['Getränke (Mrd. €)','Hobbys (Mrd. €)','Summe (Mrd. €)'],[1.4,1.3,2.7],'+','Lies beide Beträge am Ende der Balken ab.','1,4 + 1,3 = 2,7 Mrd. €.')},
+ {object:'Getränkeflasche',emoji:'🧃',title:'Getränkeausgaben im Jahresvergleich',year:'2015, 2024 und 2025',unit:'Mrd. €',labels:years,values:[.9,1.4,1.4],
+ statements:[yes('2024 und 2025 zeigen gleich hohe Säulen.',true,'Vergleiche die beiden rechten Säulen.','Beide Werte betragen 1,4 Mrd. €.'),yes('Für 2015 sind mehr als 1 Mrd. € angegeben.',false,'Lies den Wert über der ersten Säule ab.','0,9 Mrd. € ist weniger als 1 Mrd. €.')],
+ multiple:choice('Was bedeutet die Zahl 1,4 über der Säule für 2025?',['1,4 Mrd. € insgesamt für Getränke','1,4 € pro Person','1,4 % aller Einnahmen'],'1,4 Mrd. € insgesamt für Getränke','Achte auf Titel und Maßeinheit.','Die Säule steht für den gesamten ausgewiesenen Betrag in Milliarden Euro.'),
+ maths:calc('Um wie viel lagen die Getränkeausgaben 2025 über denen von 2015?',['2025 (Mrd. €)','2015 (Mrd. €)','Unterschied (Mrd. €)'],[1.4,.9,.5],'-','Ziehe den früheren Betrag vom späteren ab.','1,4 − 0,9 = 0,5 Mrd. €.')},
+ {object:'Portemonnaie',emoji:'👛',title:'Woher kam das Geld 2025?',year:'2025',unit:'Mrd. €',labels:['Regelmäßiges Nettogehalt','Regelmäßiges Taschengeld','Jobs, Nebentätigkeiten','Zusätzliches Geld von den Eltern','Geldgeschenke','Sonstiges'],values:[12.4,5.1,2.6,1.3,1.2,.2],
+ statements:[yes('Regelmäßiges Nettogehalt macht mehr als die Hälfte aus.',true,'Die Hälfte von 22,8 Mrd. € ist 11,4 Mrd. €.','12,4 Mrd. € ist mehr als 11,4 Mrd. €.'),yes('Geldgeschenke waren die zweitgrößte Einnahmequelle.',false,'Vergleiche die Größen der Segmente und die Legende.','Regelmäßiges Taschengeld war mit 5,1 Mrd. € die zweitgrößte Einnahmequelle.')],
+ multiple:choice('Wofür steht der vollständige Kreis?',['Alle Einnahmen zusammen','Alle Ausgaben zusammen','Alle Einnahmen aus kleinen Jobs'],'Alle Einnahmen zusammen','Lies den Titel und die Angabe unter dem Kreis.','Der ganze Kreis steht für insgesamt 22,8 Mrd. € Einnahmen.'),
+ maths:calc('Wie viel Prozent der Einnahmen entfielen auf regelmäßiges Taschengeld? Runde auf eine Nachkommastelle.',['Taschengeld · Prozentwert (Mrd. €)','Gesamteinnahmen · Grundwert (Mrd. €)','Anteil (%)'],[5.1,22.8,22.4],'%','Teile das Taschengeld durch die Gesamteinnahmen und nimm das Ergebnis mal 100.','5,1 ÷ 22,8 × 100 ≈ 22,4 %.')},
+ {object:'Kalender',emoji:'🗓️',title:'Gesamtausgaben zu drei Zeitpunkten',year:'2015, 2024 und 2025',unit:'Mrd. €',labels:years,values:[16.7,18.2,18.2],
+ statements:[yes('Für 2020 lässt sich ein genauer Wert ablesen.',false,'Schau, an welchen Jahren ein Punkt eingezeichnet ist.','Für 2020 ist kein Wert angegeben.'),yes('2025 lagen die Ausgaben höher als 2024.',false,'Vergleiche die letzten zwei Punkte.','Für beide Jahre sind 18,2 Mrd. € ausgewiesen.')],
+ multiple:choice('Welche Aussage ist durch die Grafik belegt?',['Die Ausgaben stiegen jedes Jahr.','2024 lagen die Ausgaben höher als 2015.','2020 betrugen die Ausgaben genau 17 Mrd. €.'],'2024 lagen die Ausgaben höher als 2015.','Vergleiche die beschrifteten Datenpunkte.','18,2 Mrd. € im Jahr 2024 sind mehr als 16,7 Mrd. € im Jahr 2015.'),
+ maths:calc('Um wie viel lagen die Gesamtausgaben 2024 über denen von 2015?',['2024 (Mrd. €)','2015 (Mrd. €)','Unterschied (Mrd. €)'],[18.2,16.7,1.5],'-','Verwende die Werte an den Punkten 2024 und 2015.','18,2 − 16,7 = 1,5 Mrd. €.') }
+];
+const text=(x,y,t,attrs='')=>'<text x="'+x+'" y="'+y+'" '+attrs+'>'+t+'</text>';
+const num=n=>new Intl.NumberFormat('de-DE',{maximumFractionDigits:1}).format(n);
+const axis='stroke="#64748b" stroke-width="1.5"';
+function figure(i){
+ const {title,year,unit,labels,values}=stations[i];
+ let drawing='';
+ if(i===0) values.forEach((v,k)=>{
+  const y=32+k*46;
+  drawing+=text(10,y+21,labels[k],'font-size="14"')+'<rect x="190" y="'+y+'" width="'+v*94+'" height="28" rx="4" fill="'+palette[k]+'"/>'+text(199+v*94,y+20,num(v));
+ });
+ if(i===1||i===3){
+  const xs=i===1?[125,280,435]:[75,412.5,450];
+  const max=i===1?1.6:20, scale=v=>246-v*205/max;
+  const ticks=i===1?[0,.4,.8,1.2,1.6]:[0,5,10,15,20];
+  ticks.forEach(v=>{const y=scale(v);drawing+='<path d="M58 '+y+'H493" stroke="#d5ddeb"/>'+text(48,y+5,num(v),'text-anchor="end" font-size="13"');});
+  drawing+='<path d="M58 39V246H493" fill="none" '+axis+'/>';
+  if(i===3) drawing+='<path d="M75 '+scale(values[0])+'L412.5 '+scale(values[1])+'" stroke="#235ac5" stroke-width="3" stroke-dasharray="7 5"/><path d="M412.5 '+scale(values[1])+'H450" stroke="#235ac5" stroke-width="3"/>';
+  values.forEach((v,k)=>{
+   const x=xs[k],y=scale(v);
+   drawing+=i===1?'<rect x="'+(x-39)+'" y="'+y+'" width="78" height="'+(246-y)+'" rx="4" fill="'+palette[k]+'"/>':'<circle cx="'+x+'" cy="'+y+'" r="5" fill="#235ac5"/>';
+   drawing+=text(x,y-(i===3&&k===1?19:9),num(v),'text-anchor="middle"')+text(x,269,labels[k],'text-anchor="middle" font-size="13"');
+  });
+ }
+ if(i===2){
+  let angle=-Math.PI/2;
+  values.forEach((v,k)=>{
+   const stop=angle+2*Math.PI*v/22.8;
+   const point=a=>[143+102*Math.cos(a),139+102*Math.sin(a)].join(' ');
+   const y=55+k*31;
+   drawing+='<path d="M143 139 L'+point(angle)+' A102 102 0 '+(v>11.4?1:0)+' 1 '+point(stop)+'Z" fill="'+palette[k]+'" stroke="white" stroke-width="1.5"/><rect x="264" y="'+(y-12)+'" width="12" height="12" fill="'+palette[k]+'"/>'+text(283,y,labels[k],'font-size="13"')+text(550,y,num(v),'text-anchor="end"');
+   angle=stop;
+  });
+  drawing+=text(143,268,'Insgesamt 22,8 Mrd. €','text-anchor="middle"');
+ }
+ return '<figure><h2>'+title+'</h2><p><small>6- bis 19-Jährige in Deutschland · '+year+' · '+unit+'</small></p><svg viewBox="0 0 565 285" role="img" aria-label="'+labels.map((l,k)=>l+': '+num(values[k])+' '+unit).join('; ')+'">'+drawing+'</svg><figcaption>'+ (i===0?'Ausgewählte Ausgabeposten. ':i===3?'Gestrichelt: Zwischen 2015 und 2024 sind keine Werte angegeben. ':'')+'Eigene Darstellung nach Globus, „Konsumfreudige Jugend“ ('+year+'). Daten: iconkids &amp; youth.</figcaption></figure>';
+}
+const attr=value=>String(value??'').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+const nav=document.querySelector('#nav'), app=document.querySelector('#app'),zoom=document.querySelector('#zoom');
+let current=null,hideDone=false,order=[0,1,2,3];
+let state=stations.map(()=>Array.from({length:5},()=>({tries:0,done:false,selected:'',values:[],message:''})));
+const done=i=>state[i].every(q=>q.done);
+const count=()=>stations.filter((_,i)=>done(i)).length;
+const questions=i=>[
+ choice('Welche Diagrammart siehst du?',diagramTypes,diagramTypes[i],['Achte auf waagerechte Balken.','Achte auf senkrechte Säulen.','Die Flächen bilden zusammen einen Kreis.','Die Punkte liegen auf einer Zeitachse und sind verbunden.'][i],'Das ist ein '+diagramTypes[i]+'.'),
+ ...stations[i].statements,stations[i].multiple,stations[i].maths
+];
+function home(){
+ current=null;
+ nav.innerHTML='<strong>BwR 7b · Infografiken</strong><span>'+count()+' von 4 Stationen bearbeitet</span>';
+ app.innerHTML='<h1>Kinoabend bei Mia</h1><p>Tippe auf einen Gegenstand. Lies die Grafik und prüfe deine Antworten.</p><div class="tools"><label><input type="checkbox" id="hide" '+(hideDone?'checked':'')+'> Fertige zur Seite legen</label><button id="shuffle">Gegenstände neu ausbreiten</button></div><div class="tabletop">'+order.filter(i=>!hideDone||!done(i)).map(i=>'<button class="item" draggable="true" data-open="'+i+'"><span aria-hidden="true">'+stations[i].emoji+'</span>'+stations[i].object+(done(i)?'<small class="done"><br>✓ Bearbeitet</small>':'')+'</button>').join('')+'</div><div class="tools"><button id="print">Grafiken drucken</button><button id="teacher">Für Lehrkräfte</button></div>';
+ document.querySelector('#hide').onchange=e=>{hideDone=e.target.checked;home()};
+ document.querySelector('#shuffle').onclick=()=>{order=[...order.slice(1),order[0]];home()};
+ app.querySelectorAll('[data-open]').forEach(b=>{
+  const target=+b.dataset.open;
+  b.onclick=()=>station(target);
+  b.ondragstart=e=>e.dataTransfer.setData('text/plain',String(target));
+  b.ondragover=e=>e.preventDefault();
+  b.ondrop=e=>{
+   e.preventDefault();
+   const sourceText=e.dataTransfer.getData('text/plain');
+   if(!/^[0-3]$/.test(sourceText)||+sourceText===target)return;
+   const from=order.indexOf(+sourceText),to=order.indexOf(target);
+   [order[from],order[to]]=[order[to],order[from]];
+   home();
+  };
+ });
+ document.querySelector('#print').onclick=()=>{app.innerHTML=stations.map((_,i)=>figure(i)).join('');window.print();home()};
+ document.querySelector('#teacher').onclick=()=>{zoom.innerHTML='<button data-close>Schließen</button><h2>Lösungen für Lehrkräfte</h2>'+stations.map((s,i)=>'<section class="card"><h3>'+s.object+'</h3>'+questions(i).map(q=>'<p>'+q.prompt+'<br><strong>'+q.explanation+'</strong></p>').join('')+'</section>').join('');openDialog()};
+}
+function openDialog(){zoom.querySelector('[data-close]').onclick=()=>zoom.close();zoom.showModal()}
+function station(i){
+ current=i;
+ nav.innerHTML='<div class="tools"><button id="prev" aria-label="Vorherige Station" '+(!i?'disabled':'')+'>‹</button><button id="next" aria-label="Nächste Station" '+(i===3?'disabled':'')+'>›</button></div><strong>Station '+(i+1)+' von 4 · '+stations[i].object+'</strong><button id="back">Fertig</button>';
+ const qs=questions(i);
+ const flags=k=>state[i][k].done?' ✓':'';
+ function fields(k){
+  const q=qs[k],s=state[i][k];
+  return '<fieldset><legend>'+q.prompt+flags(k)+'</legend>'+(q.options?'<div class="choices">'+q.options.map((v,j)=>'<button data-answer="'+k+':'+j+'" aria-pressed="'+(s.selected===v)+'" '+(s.done?'disabled':'')+'>'+v+'</button>').join('')+'</div>':q.labels.map((l,j)=>'<label>'+l+' <input data-input="'+j+'" inputmode="decimal" value="'+attr(s.values[j])+'" '+(s.done?'disabled':'')+'></label>').join('')+'<div class="tools"><button id="calculator">Rechner</button><button id="check" '+(s.done?'disabled':'')+'>Prüfen</button></div>')+'<p class="status '+(s.done?'good':'')+'" aria-live="polite">'+s.message+'</p></fieldset>';
+ }
+ app.innerHTML='<div class="layout"><div class="graphic">'+figure(i)+'<button id="expand">Grafik vergrößern</button></div><div><section class="card"><h3>1. Diagrammart erkennen</h3>'+fields(0)+'</section><section class="card"><h3>2. Ja oder Nein</h3>'+fields(1)+fields(2)+'</section><section class="card"><h3>3. Eine Antwort auswählen</h3>'+fields(3)+'</section><section class="card"><h3>4. Zahlen eingeben</h3>'+fields(4)+'</section><button id="reset">Antworten dieser Station zurücksetzen</button></div></div>';
+ document.querySelector('#prev').onclick=()=>{station(i-1);scrollTo(0,0)};
+ document.querySelector('#next').onclick=()=>{station(i+1);scrollTo(0,0)};
+ document.querySelector('#back').onclick=()=>{home();scrollTo(0,0)};
+ document.querySelector('#expand').onclick=()=>{zoom.innerHTML='<button data-close>Schließen</button>'+figure(i);openDialog()};
+ app.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>{const [k,j]=b.dataset.answer.split(':').map(Number);const s=state[i][k];const v=qs[k].options[j];s.selected=v;check(k,v===qs[k].answer);});
+ app.querySelectorAll('[data-input]').forEach(b=>b.oninput=()=>state[i][4].values[+b.dataset.input]=b.value);
+ function parse(value){return /^\s*[+-]?\d+(?:[.,]\d+)?\s*$/.test(value??'')?Number(value.replace(',','.')):NaN}
+ function check(k,correct){
+  const s=state[i][k],q=qs[k];
+  if(!correct)s.tries++;
+  s.done=correct||s.tries>=3;
+  s.message=correct?'Richtig. '+q.explanation:s.done?'Lösung: '+q.explanation:'Tipp: '+q.hint;
+  station(i);
+ }
+ document.querySelector('#check').onclick=()=>{
+  const values=state[i][4].values;
+  if(qs[4].answer.some((_,j)=>!Number.isFinite(parse(values[j])))){state[i][4].message='Trage in alle drei Felder eine Zahl ein.';station(i);return;}
+  check(4,qs[4].answer.every((v,j)=>Math.abs(v-parse(values[j]))<.00001));
+ };
+ document.querySelector('#calculator').onclick=()=>{
+  const q=qs[4];
+  zoom.innerHTML='<button data-close>Schließen</button><h2>Rechner</h2><p>'+(q.formula==='%'?'Prozentwert ÷ Grundwert × 100':q.formula==='+'?'Erster Betrag + zweiter Betrag':'Späterer Betrag − früherer Betrag')+'</p><label>'+q.labels[0]+' <input id="a" inputmode="decimal"></label><label>'+q.labels[1]+' <input id="b" inputmode="decimal"></label><button id="calculate">Berechnen</button><output id="result" aria-live="polite"></output>';
+  openDialog();
+  zoom.querySelector('#calculate').onclick=()=>{
+   const a=parse(zoom.querySelector('#a').value),b=parse(zoom.querySelector('#b').value);
+   const result=q.formula==='%'?a/b*100:q.formula==='+'?a+b:a-b;
+   zoom.querySelector('#result').textContent=Number.isFinite(result)?' Ergebnis: '+num(result)+(q.formula==='%'?' %':' Mrd. €'):' Bitte zwei gültige Zahlen eingeben.';
+  };
+ };
+ document.querySelector('#reset').onclick=()=>{state[i]=Array.from({length:5},()=>({tries:0,done:false,selected:'',values:[],message:''}));station(i)};
+}
+home();
+</script></html>
