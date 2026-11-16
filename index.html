@@ -53,6 +53,15 @@
 #zoom[open]{max-height:calc(100dvh - 24px);overflow:auto}
 
 .tv-finale{position:absolute;top:2%;left:37.5%;width:28%;height:20.5%;display:grid;place-items:center;padding:.4em;text-align:center;color:#fff4cc;background:#10203a;border-radius:4%;box-shadow:inset 0 0 1.35em #4f82be;font-size:clamp(.69rem,2.35vw,1.75rem);font-weight:800;line-height:1.12;z-index:1}
+
+.method-guide{padding:0 1.25rem 1rem;max-width:660px}
+.method-guide li{padding:.18rem 0 .62rem}
+#solution-form input{width:12rem;max-width:100%}
+@media print{
+ :root,body,figure,figure *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+ figure{box-shadow:none;break-inside:avoid;page-break-inside:avoid}
+ #work,#zoom{display:none!important}
+}
 </style>
 <header id="nav"></header><main id="app"></main><dialog id="work" aria-labelledby="station-title"><div class="station-shell"><div id="tasknav"></div><div id="taskbody"></div></div></dialog><dialog id="zoom"></dialog>
 <script>
@@ -141,11 +150,34 @@ function home(){
  if(work.open)work.close();
  current=null;
  nav.innerHTML='<strong>BwR 7b · Infografiken</strong><span>'+count()+' von 4 Stationen bearbeitet</span>';
- app.innerHTML='<h1>Kinoabend bei Mia</h1><p>Tippe auf einen Gegenstand. Lies die Grafik und prüfe deine Antworten.</p><div class="tools"><label><input type="checkbox" id="hide" '+(hideDone?'checked':'')+'> Fertige zur Seite legen</label></div><div class="scene" role="group" aria-label="Wohnzimmer von Mia mit vier Gegenständen auf dem Tisch">'+(count()===stations.length?'<div class="tv-finale" role="status">Jetzt kann der Kinoabend losgehen!</div>':'')+stations.map((obj,i)=>hideDone&&done(i)?'':'<button class="hotspot" style="left:'+ [26.3,42,57.4,75.2][i] +'%" data-open="'+i+'"><span '+(done(i)?'class="done"':'')+'>'+obj.object+(done(i)?' ✓':'')+'</span></button>').join('')+'</div><div class="tools"><button id="print">Grafiken drucken</button><button id="teacher">Für Lehrkräfte</button></div>';
+ app.innerHTML='<h1>Kinoabend bei Mia</h1><p>Tippe auf einen Gegenstand. Lies die Grafik und prüfe deine Antworten.</p><div class="tools"><label><input type="checkbox" id="hide" '+(hideDone?'checked':'')+'> Fertige zur Seite legen</label></div><div class="scene" role="group" aria-label="Wohnzimmer von Mia mit vier Gegenständen auf dem Tisch">'+(count()===stations.length?'<div class="tv-finale" role="status">Jetzt kann der Kinoabend losgehen!</div>':'')+stations.map((obj,i)=>hideDone&&done(i)?'':'<button class="hotspot" style="left:'+ [26.3,42,57.4,75.2][i] +'%" data-open="'+i+'"><span '+(done(i)?'class="done"':'')+'>'+obj.object+(done(i)?' ✓':'')+'</span></button>').join('')+'</div><div class="tools"><button id="print">Grafiken drucken</button><button id="method">4-Schritt-Methode</button><button id="teacher">Lösungen</button></div>';
  document.querySelector('#hide').onchange=e=>{hideDone=e.target.checked;home()};
  app.querySelectorAll('[data-open]').forEach(button=>button.onclick=()=>{station(+button.dataset.open);scrollTo(0,0)});
  document.querySelector('#print').onclick=()=>{app.innerHTML=stations.map((_,i)=>figure(i)).join('');window.print();home()};
- document.querySelector('#teacher').onclick=()=>{zoom.innerHTML='<button data-close>Schließen</button><h2>Lösungen für Lehrkräfte</h2>'+stations.map((s,i)=>'<section class="card"><h3>'+s.object+'</h3>'+questions(i).map(q=>'<p>'+q.prompt+'<br><strong>'+q.explanation+'</strong></p>').join('')+'</section>').join('');openDialog()};
+ document.querySelector('#method').onclick=()=>{
+  zoom.innerHTML='<button data-close>Schließen</button><section class="method-guide"><h2>4-Schritt-Methode zur Schaubildauswertung</h2><ol><li><strong>Formale Informationen</strong><br>Prüfe Herausgeber, Datenquelle, Personengruppe oder Ort, Zeitraum, Einheit und Diagrammart.</li><li><strong>Schaubildthema</strong><br>Fasse in einem Satz zusammen, worum es geht. Beginne mit „Das Schaubild zeigt …“.</li><li><strong>Kernaussage</strong><br>Formuliere die wichtigste Information und belege sie mit passenden Zahlen. Beginne mit „Die wichtigste Information ist …“.</li><li><strong>Zusatzinformationen</strong><br>Ergänze weitere auffällige Werte. Schau auch auf ein mögliches Nebendiagramm. Beginne mit „Außerdem ist zu erkennen, dass …“.</li></ol><h3>Welche Diagrammart passt?</h3><ul><li><strong>Balkendiagramm</strong> · Rangfolge zeigen</li><li><strong>Säulendiagramm</strong> · Werte vergleichen</li><li><strong>Liniendiagramm</strong> · Veränderungen im Zeitverlauf zeigen</li><li><strong>Kreisdiagramm</strong> · Anteile an einem Ganzen darstellen</li></ul></section>';
+  openDialog();
+ };
+ document.querySelector('#teacher').onclick=()=>{
+  zoom.innerHTML='<button data-close>Schließen</button><section class="method-guide"><h2>Lösungen</h2><form id="solution-form"><label>PIN für die Lösungsübersicht <input id="solution-pin" type="password" inputmode="numeric" autocomplete="off" required></label><button type="submit">Öffnen</button><p id="solution-status" role="status"></p></form></section>';
+  openDialog();
+  const form=zoom.querySelector('#solution-form');
+  form.onsubmit=async event=>{
+   event.preventDefault();
+   const entered=form.querySelector('#solution-pin');
+   const bytes=new TextEncoder().encode(entered.value.trim());
+   const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
+   if(!zoom.open||zoom.querySelector('#solution-form')!==form)return;
+   if(hash!=='93cfbd608bcf65b1f912292bed9e5b1a6d7c0c9143af4180433bab3312362dcd'){
+    form.querySelector('#solution-status').textContent='Die PIN stimmt nicht.';
+    entered.select();
+    return;
+   }
+   zoom.innerHTML='<button data-close>Schließen</button><h2>Lösungen</h2>'+stations.map((s,i)=>'<section class="card"><h3>'+s.object+'</h3>'+questions(i).map(q=>'<p>'+q.prompt+'<br><strong>'+q.explanation+'</strong></p>').join('')+'</section>').join('');
+   zoom.querySelector('[data-close]').onclick=()=>zoom.close();
+   zoom.querySelector('[data-close]').focus();
+  };
+ };
 }
 function openDialog(){zoom.querySelector('[data-close]').onclick=()=>zoom.close();zoom.showModal()}
 function station(i){
