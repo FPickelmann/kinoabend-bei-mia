@@ -9,8 +9,46 @@
 .hotspot .done{color:#176341}
 @media(max-width:520px){.scene{border-radius:12px}.hotspot span{font-size:.62rem;padding:.21rem .25rem}.hotspot{width:23%;height:34%}}
 @media print{.scene{display:none!important}}
+
+#work{border:0;padding:0;border-radius:22px;background:#f2f2f7;color:#1c1c1e;width:min(1180px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:hidden;box-shadow:0 26px 75px #0004}
+#work::backdrop{background:#0005;backdrop-filter:blur(3px)}
+.station-shell{display:grid;grid-template-rows:auto minmax(0,1fr);height:min(780px,calc(100dvh - 24px))}
+#tasknav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:10px 14px;gap:8px;background:#f9f9fb;border-bottom:1px solid #d9d9de;color:#1c1c1e}
+#tasknav strong{font-size:1rem;text-align:center}
+#tasknav button{background:transparent;color:#0065cf;padding:0 10px;min-height:38px;border-radius:99px}
+#tasknav .tools{gap:4px}
+#tasknav .tools button{width:38px;background:#e8e8ed;font-size:1.4rem;padding:0;line-height:1}
+#tasknav #back{justify-self:end}
+#taskbody{min-height:0;overflow:hidden}
+#taskbody .layout{height:100%;grid-template-columns:minmax(0,1fr) 410px;gap:0;align-items:stretch}
+#taskbody .graphic{position:static;overflow:auto;min-width:0;padding:20px;background:#e9eaee}
+#taskbody figure{padding:14px;border-radius:5px;box-shadow:0 12px 25px #0001,0 1px 5px #0002}
+#taskbody figure h2{font-size:clamp(1.15rem,2.3vw,1.55rem)}
+#taskbody .questions{min-width:0;overflow:auto;padding:6px 16px 20px;border-left:1px solid #d9d9de}
+#taskbody .card{box-shadow:none;background:transparent;border-radius:0;padding:0;margin:0 0 4px}
+#taskbody .card h3{font-size:.94rem;margin:0;padding:17px 4px 8px;color:#3a3a44}
+#taskbody .card fieldset{border-radius:13px;background:#fff;min-width:0;margin:0;padding:8px}
+#taskbody .card legend{float:left;width:100%;padding:5px 6px;font-size:.93rem}
+#taskbody .card legend + *{clear:both}
+#taskbody .choices{display:grid;grid-template-columns:1fr 1fr;margin:0;gap:7px}
+#taskbody .choices button{border-radius:9px;background:#eeeef3;color:#24242c;font-size:.93rem;font-weight:500;padding:8px;min-height:44px}
+#taskbody .choices button:last-child:nth-child(odd){grid-column:1 / -1}
+#taskbody .choices button[aria-pressed=true]{background:#d7e6ff;color:#12365c}
+#taskbody .choices button.ok{background:#248054;color:#fff}
+#taskbody .status{font-size:.85rem;min-height:0;margin:.35rem 0 0}
+#taskbody .status:empty{display:none}
+#taskbody .statements{background:#fff;border-radius:13px;padding:0 10px}
+#taskbody .statement{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 10px;padding:11px 4px;font-size:.93rem}
+#taskbody .statement+.statement{border-top:1px solid #e4e4e9}
+#taskbody .statement .choices{display:flex;background:#e8e8ed;border-radius:9px;padding:2px;gap:2px}
+#taskbody .statement .choices button{background:transparent;min-height:32px;min-width:46px;padding:4px 7px}
+#taskbody .statement .choices button.ok{background:#248054;color:#fff}
+#taskbody .statement .status{grid-column:1/-1}
+#taskbody #reset{margin-top:12px}
+@media(max-width:859px){#taskbody{overflow:auto}#taskbody .layout{display:block;height:auto}#taskbody .graphic,#taskbody .questions{overflow:visible}#taskbody .graphic{padding:12px}#taskbody .questions{border-left:0}}
+@media(max-width:450px){#work{width:calc(100vw - 12px);border-radius:14px}#tasknav{padding:8px 7px}#tasknav strong{font-size:.83rem}}
 </style>
-<header id="nav"></header><main id="app"></main><dialog id="zoom"></dialog>
+<header id="nav"></header><main id="app"></main><dialog id="work" aria-labelledby="station-title"><div class="station-shell"><div id="tasknav"></div><div id="taskbody"></div></div></dialog><dialog id="zoom"></dialog>
 <script>
 'use strict';
 const diagramTypes=['Balkendiagramm','Säulendiagramm','Kreisdiagramm','Liniendiagramm'];
@@ -83,7 +121,10 @@ const questions=i=>[
  choice('Welche Diagrammart siehst du?',diagramTypes,diagramTypes[i],['Achte auf waagerechte Balken.','Achte auf senkrechte Säulen.','Die Flächen bilden zusammen einen Kreis.','Die Punkte liegen auf einer Zeitachse und sind verbunden.'][i],'Das ist ein '+diagramTypes[i]+'.'),
  ...stations[i].statements,stations[i].multiple,stations[i].maths
 ];
+const work=document.querySelector('#work'),tasknav=document.querySelector('#tasknav'),taskbody=document.querySelector('#taskbody');
+work.addEventListener('cancel',e=>{e.preventDefault();home()});
 function home(){
+ if(work.open)work.close();
  current=null;
  nav.innerHTML='<strong>BwR 7b · Infografiken</strong><span>'+count()+' von 4 Stationen bearbeitet</span>';
  app.innerHTML='<h1>Kinoabend bei Mia</h1><p>Tippe auf einen Gegenstand. Lies die Grafik und prüfe deine Antworten.</p><div class="tools"><label><input type="checkbox" id="hide" '+(hideDone?'checked':'')+'> Fertige zur Seite legen</label></div><div class="scene" role="group" aria-label="Wohnzimmer von Mia mit vier Gegenständen auf dem Tisch">'+stations.map((obj,i)=>hideDone&&done(i)?'':'<button class="hotspot" style="left:'+ [26.3,42,57.4,75.2][i] +'%" data-open="'+i+'"><span '+(done(i)?'class="done"':'')+'>'+obj.object+(done(i)?' ✓':'')+'</span></button>').join('')+'</div><div class="tools"><button id="print">Grafiken drucken</button><button id="teacher">Für Lehrkräfte</button></div>';
@@ -94,21 +135,28 @@ function home(){
 }
 function openDialog(){zoom.querySelector('[data-close]').onclick=()=>zoom.close();zoom.showModal()}
 function station(i){
+ const previous=current;
+ const mobileScroll=previous===i?taskbody.scrollTop:0;
+ const questionScroll=previous===i?(taskbody.querySelector('.questions')?.scrollTop??0):0;
  current=i;
- nav.innerHTML='<div class="tools"><button id="prev" aria-label="Vorherige Station" '+(!i?'disabled':'')+'>‹</button><button id="next" aria-label="Nächste Station" '+(i===3?'disabled':'')+'>›</button></div><strong>Station '+(i+1)+' von 4 · '+stations[i].object+'</strong><button id="back">Fertig</button>';
+ tasknav.innerHTML='<div class="tools"><button id="prev" aria-label="Vorherige Station" '+(!i?'disabled':'')+'>‹</button><button id="next" aria-label="Nächste Station" '+(i===3?'disabled':'')+'>›</button></div><strong id="station-title">Station '+(i+1)+' von 4 · '+stations[i].object+'</strong><button id="back">Fertig</button>';
  const qs=questions(i);
  const flags=k=>state[i][k].done?' ✓':'';
  function fields(k){
   const q=qs[k],s=state[i][k];
-  return '<fieldset><legend>'+q.prompt+flags(k)+'</legend>'+(q.options?'<div class="choices">'+q.options.map((v,j)=>'<button data-answer="'+k+':'+j+'" aria-pressed="'+(s.selected===v)+'" '+(s.done?'disabled':'')+'>'+v+'</button>').join('')+'</div>':q.labels.map((l,j)=>'<label>'+l+' <input data-input="'+j+'" inputmode="decimal" value="'+attr(s.values[j])+'" '+(s.done?'disabled':'')+'></label>').join('')+'<div class="tools"><button id="calculator">Rechner</button><button id="check" '+(s.done?'disabled':'')+'>Prüfen</button></div>')+'<p class="status '+(s.done?'good':'')+'" aria-live="polite">'+s.message+'</p></fieldset>';
+  const yn=k===1||k===2;
+  return (yn?'<div class="statement" role="group" aria-labelledby="prompt-'+k+'"><span id="prompt-'+k+'">':'<fieldset><legend>')+q.prompt+flags(k)+(yn?'</span>':'</legend>')+(q.options?'<div class="choices">'+q.options.map((v,j)=>'<button class="'+(s.done&&s.selected===q.answer&&v===q.answer?'ok':'')+'" data-answer="'+k+':'+j+'" aria-pressed="'+(s.selected===v)+'" '+(s.done?'disabled':'')+'>'+v+'</button>').join('')+'</div>':q.labels.map((l,j)=>'<label>'+l+' <input data-input="'+j+'" inputmode="decimal" value="'+attr(s.values[j])+'" '+(s.done?'disabled':'')+'></label>').join('')+'<div class="tools"><button id="calculator">Rechner</button><button id="check" '+(s.done?'disabled':'')+'>Prüfen</button></div>')+'<p class="status '+(s.done?'good':'')+'" aria-live="polite">'+s.message+'</p>'+(yn?'</div>':'</fieldset>');
  }
- app.innerHTML='<div class="layout"><div class="graphic">'+figure(i)+'<button id="expand">Grafik vergrößern</button></div><div><section class="card"><h3>1. Diagrammart erkennen</h3>'+fields(0)+'</section><section class="card"><h3>2. Ja oder Nein</h3>'+fields(1)+fields(2)+'</section><section class="card"><h3>3. Eine Antwort auswählen</h3>'+fields(3)+'</section><section class="card"><h3>4. Zahlen eingeben</h3>'+fields(4)+'</section><button id="reset">Antworten dieser Station zurücksetzen</button></div></div>';
+ taskbody.innerHTML='<div class="layout"><div class="graphic">'+figure(i)+'<button id="expand">Grafik vergrößern</button></div><div class="questions"><section class="card"><h3>1. Diagrammart erkennen</h3>'+fields(0)+'</section><section class="card"><h3>2. Ja oder Nein</h3><div class="statements">'+fields(1)+fields(2)+'</div></section><section class="card"><h3>3. Eine Antwort auswählen</h3>'+fields(3)+'</section><section class="card"><h3>4. Zahlen eingeben</h3>'+fields(4)+'</section><button id="reset">Antworten dieser Station zurücksetzen</button></div></div>';
+ if(!work.open)work.showModal();
+ taskbody.scrollTop=mobileScroll;
+ taskbody.querySelector('.questions').scrollTop=questionScroll;
  document.querySelector('#prev').onclick=()=>{station(i-1);scrollTo(0,0)};
  document.querySelector('#next').onclick=()=>{station(i+1);scrollTo(0,0)};
  document.querySelector('#back').onclick=()=>{home();scrollTo(0,0)};
  document.querySelector('#expand').onclick=()=>{zoom.innerHTML='<button data-close>Schließen</button>'+figure(i);openDialog()};
- app.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>{const [k,j]=b.dataset.answer.split(':').map(Number);const s=state[i][k];const v=qs[k].options[j];s.selected=v;check(k,v===qs[k].answer);});
- app.querySelectorAll('[data-input]').forEach(b=>b.oninput=()=>state[i][4].values[+b.dataset.input]=b.value);
+ taskbody.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>{const [k,j]=b.dataset.answer.split(':').map(Number);const s=state[i][k];const v=qs[k].options[j];s.selected=v;check(k,v===qs[k].answer);});
+ taskbody.querySelectorAll('[data-input]').forEach(b=>b.oninput=()=>state[i][4].values[+b.dataset.input]=b.value);
  function parse(value){return /^\s*[+-]?\d+(?:[.,]\d+)?\s*$/.test(value??'')?Number(value.replace(',','.')):NaN}
  function check(k,correct){
   const s=state[i][k],q=qs[k];
