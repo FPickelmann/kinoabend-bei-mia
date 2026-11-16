@@ -51,6 +51,8 @@
 .reference-links{margin-top:.5rem}
 #zoom .reference-image{display:block;width:100%;height:auto;margin-top:.75rem}
 #zoom[open]{max-height:calc(100dvh - 24px);overflow:auto}
+
+.tv-finale{position:absolute;top:2%;left:37.5%;width:28%;height:20.5%;display:grid;place-items:center;padding:.4em;text-align:center;color:#fff4cc;background:#10203a;border-radius:4%;box-shadow:inset 0 0 1.35em #4f82be;font-size:clamp(.69rem,2.35vw,1.75rem);font-weight:800;line-height:1.12;z-index:1}
 </style>
 <header id="nav"></header><main id="app"></main><dialog id="work" aria-labelledby="station-title"><div class="station-shell"><div id="tasknav"></div><div id="taskbody"></div></div></dialog><dialog id="zoom"></dialog>
 <script>
@@ -119,12 +121,19 @@ function figure(i){
 const attr=value=>String(value??'').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 const nav=document.querySelector('#nav'), app=document.querySelector('#app'),zoom=document.querySelector('#zoom');
 let current=null,hideDone=false;
-let state=stations.map(()=>Array.from({length:5},()=>({tries:0,done:false,selected:'',values:[],message:''})));
+const fifthTasks=[
+ calc('Wie viel mehr wurde 2024 für Kleidung und Mode als für salzige Knabbersachen und Chips ausgegeben? Nutze das Balkendiagramm und die Originalgrafik von 2024.',['Kleidung und Mode (Mrd. €)','Salzige Knabbersachen und Chips (Mrd. €)','Unterschied (Mrd. €)'],[3.2,.6,2.6],'-','Lies den Betrag für Kleidung und Mode im Balkendiagramm ab. Suche den Chipsposten in der Originalgrafik von 2024.','3,2 − 0,6 = 2,6 Mrd. €.'),
+ calc('Lies im Säulendiagramm die Getränkeausgaben für 2025 und in der Originalgrafik die Gesamtausgaben für 2025 ab. Berechne den Anteil der Getränkeausgaben in Prozent. Runde auf eine Nachkommastelle.',['Getränkeausgaben 2025 (Mrd. €)','Gesamtausgaben 2025 (Mrd. €)','Anteil (%)'],[1.4,18.2,7.7],'%','Teile die Getränkeausgaben durch die Gesamtausgaben und multipliziere mit 100.','1,4 ÷ 18,2 × 100 ≈ 7,7 %.'),
+ calc('Vergleiche das regelmäßige Taschengeld im Kreisdiagramm für 2025 mit der Originalgrafik für 2015. Berechne, um wie viel der Betrag gesunken ist.',['Taschengeld 2015 (Mrd. €)','Taschengeld 2025 (Mrd. €)','Rückgang (Mrd. €)'],[5.9,5.1,.8],'-','Ziehe den Betrag von 2025 vom Betrag von 2015 ab.','5,9 − 5,1 = 0,8 Mrd. €.'),
+ calc('Lies die Gesamtausgaben für 2025 im Liniendiagramm und die Gesamteinnahmen in der Originalgrafik für 2025 ab. Berechne, um wie viel die Einnahmen höher waren.',['Gesamteinnahmen 2025 (Mrd. €)','Gesamtausgaben 2025 (Mrd. €)','Unterschied (Mrd. €)'],[22.8,18.2,4.6],'-','Ziehe die Gesamtausgaben von den Gesamteinnahmen ab.','22,8 − 18,2 = 4,6 Mrd. €.')
+];
+const emptyStation=()=>Array.from({length:6},()=>({tries:0,done:false,selected:'',values:[],message:''}));
+let state=stations.map(emptyStation);
 const done=i=>state[i].every(q=>q.done);
 const count=()=>stations.filter((_,i)=>done(i)).length;
 const questions=i=>[
  choice('Welche Diagrammart siehst du?',diagramTypes,diagramTypes[i],['Achte auf waagerechte Balken.','Achte auf senkrechte Säulen.','Die Flächen bilden zusammen einen Kreis.','Die Punkte liegen auf einer Zeitachse und sind verbunden.'][i],'Das ist ein '+diagramTypes[i]+'.'),
- ...stations[i].statements,stations[i].multiple,stations[i].maths
+ ...stations[i].statements,stations[i].multiple,stations[i].maths,fifthTasks[i]
 ];
 const work=document.querySelector('#work'),tasknav=document.querySelector('#tasknav'),taskbody=document.querySelector('#taskbody');
 work.addEventListener('cancel',e=>{e.preventDefault();home()});
@@ -132,7 +141,7 @@ function home(){
  if(work.open)work.close();
  current=null;
  nav.innerHTML='<strong>BwR 7b · Infografiken</strong><span>'+count()+' von 4 Stationen bearbeitet</span>';
- app.innerHTML='<h1>Kinoabend bei Mia</h1><p>Tippe auf einen Gegenstand. Lies die Grafik und prüfe deine Antworten.</p><div class="tools"><label><input type="checkbox" id="hide" '+(hideDone?'checked':'')+'> Fertige zur Seite legen</label></div><div class="scene" role="group" aria-label="Wohnzimmer von Mia mit vier Gegenständen auf dem Tisch">'+stations.map((obj,i)=>hideDone&&done(i)?'':'<button class="hotspot" style="left:'+ [26.3,42,57.4,75.2][i] +'%" data-open="'+i+'"><span '+(done(i)?'class="done"':'')+'>'+obj.object+(done(i)?' ✓':'')+'</span></button>').join('')+'</div><div class="tools"><button id="print">Grafiken drucken</button><button id="teacher">Für Lehrkräfte</button></div>';
+ app.innerHTML='<h1>Kinoabend bei Mia</h1><p>Tippe auf einen Gegenstand. Lies die Grafik und prüfe deine Antworten.</p><div class="tools"><label><input type="checkbox" id="hide" '+(hideDone?'checked':'')+'> Fertige zur Seite legen</label></div><div class="scene" role="group" aria-label="Wohnzimmer von Mia mit vier Gegenständen auf dem Tisch">'+(count()===stations.length?'<div class="tv-finale" role="status">Jetzt kann der Kinoabend losgehen!</div>':'')+stations.map((obj,i)=>hideDone&&done(i)?'':'<button class="hotspot" style="left:'+ [26.3,42,57.4,75.2][i] +'%" data-open="'+i+'"><span '+(done(i)?'class="done"':'')+'>'+obj.object+(done(i)?' ✓':'')+'</span></button>').join('')+'</div><div class="tools"><button id="print">Grafiken drucken</button><button id="teacher">Für Lehrkräfte</button></div>';
  document.querySelector('#hide').onchange=e=>{hideDone=e.target.checked;home()};
  app.querySelectorAll('[data-open]').forEach(button=>button.onclick=()=>{station(+button.dataset.open);scrollTo(0,0)});
  document.querySelector('#print').onclick=()=>{app.innerHTML=stations.map((_,i)=>figure(i)).join('');window.print();home()};
@@ -150,9 +159,9 @@ function station(i){
  function fields(k){
   const q=qs[k],s=state[i][k];
   const yn=k===1||k===2;
-  return (yn?'<div class="statement" role="group" aria-labelledby="prompt-'+k+'"><span id="prompt-'+k+'">':'<fieldset><legend>')+q.prompt+flags(k)+(yn?'</span>':'</legend>')+(q.options?'<div class="choices">'+q.options.map((v,j)=>'<button class="'+(s.done&&s.selected===q.answer&&v===q.answer?'ok':'')+'" data-answer="'+k+':'+j+'" aria-pressed="'+(s.selected===v)+'" '+(s.done?'disabled':'')+'>'+v+'</button>').join('')+'</div>':q.labels.map((l,j)=>'<label>'+l+' <input data-input="'+j+'" inputmode="decimal" value="'+attr(s.values[j])+'" '+(s.done?'disabled':'')+'></label>').join('')+'<div class="tools"><button id="calculator">Rechner</button><button id="check" '+(s.done?'disabled':'')+'>Prüfen</button></div>')+'<p class="status '+(s.done?'good':'')+'" aria-live="polite">'+s.message+'</p>'+(yn?'</div>':'</fieldset>');
+  return (yn?'<div class="statement" role="group" aria-labelledby="prompt-'+k+'"><span id="prompt-'+k+'">':'<fieldset><legend>')+q.prompt+flags(k)+(yn?'</span>':'</legend>')+(q.options?'<div class="choices">'+q.options.map((v,j)=>'<button class="'+(s.done&&s.selected===q.answer&&v===q.answer?'ok':'')+'" data-answer="'+k+':'+j+'" aria-pressed="'+(s.selected===v)+'" '+(s.done?'disabled':'')+'>'+v+'</button>').join('')+'</div>':q.labels.map((l,j)=>'<label>'+l+' <input data-input="'+k+':'+j+'" inputmode="decimal" value="'+attr(s.values[j])+'" '+(s.done?'disabled':'')+'></label>').join('')+'<div class="tools"><button data-calculator="'+k+'">Rechner</button><button data-check="'+k+'" '+(s.done?'disabled':'')+'>Prüfen</button></div>')+'<p class="status '+(s.done?'good':'')+'" aria-live="polite">'+s.message+'</p>'+(yn?'</div>':'</fieldset>');
  }
- taskbody.innerHTML='<div class="layout"><div class="graphic">'+figure(i)+'<div class="tools reference-links"><button id="expand">Grafik vergrößern</button>'+[2015,2024,2025].map(year=>'<button data-reference="'+year+'" aria-label="Originalgrafik '+year+' öffnen">'+year+'</button>').join('')+'</div></div><div class="questions"><section class="card"><h3>1. Diagrammart erkennen</h3>'+fields(0)+'</section><section class="card"><h3>2. Ja oder Nein</h3><div class="statements">'+fields(1)+fields(2)+'</div></section><section class="card"><h3>3. Eine Antwort auswählen</h3>'+fields(3)+'</section><section class="card"><h3>4. Zahlen eingeben</h3>'+fields(4)+'</section><button id="reset">Antworten dieser Station zurücksetzen</button></div></div>';
+ taskbody.innerHTML='<div class="layout"><div class="graphic">'+figure(i)+'<div class="tools reference-links"><button id="expand">Grafik vergrößern</button>'+[2015,2024,2025].map(year=>'<button data-reference="'+year+'" aria-label="Originalgrafik '+year+' öffnen">'+year+'</button>').join('')+'</div></div><div class="questions"><section class="card"><h3>1. Diagrammart erkennen</h3>'+fields(0)+'</section><section class="card"><h3>2. Ja oder Nein</h3><div class="statements">'+fields(1)+fields(2)+'</div></section><section class="card"><h3>3. Eine Antwort auswählen</h3>'+fields(3)+'</section><section class="card"><h3>4. Zahlen eingeben</h3>'+fields(4)+'</section><section class="card"><h3>5. Mit einer Originalgrafik vergleichen</h3>'+fields(5)+'</section><button id="reset">Antworten dieser Station zurücksetzen</button></div></div>';
  if(!work.open)work.showModal();
  taskbody.scrollTop=mobileScroll;
  taskbody.querySelector('.questions').scrollTop=questionScroll;
@@ -166,7 +175,10 @@ function station(i){
   openDialog();
  });
  taskbody.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>{const [k,j]=b.dataset.answer.split(':').map(Number);const s=state[i][k];const v=qs[k].options[j];s.selected=v;check(k,v===qs[k].answer);});
- taskbody.querySelectorAll('[data-input]').forEach(b=>b.oninput=()=>state[i][4].values[+b.dataset.input]=b.value);
+ taskbody.querySelectorAll('[data-input]').forEach(b=>b.oninput=()=>{
+  const [k,j]=b.dataset.input.split(':').map(Number);
+  state[i][k].values[j]=b.value;
+ });
  function parse(value){return /^\s*[+-]?\d+(?:[.,]\d+)?\s*$/.test(value??'')?Number(value.replace(',','.')):NaN}
  function check(k,correct){
   const s=state[i][k],q=qs[k];
@@ -175,14 +187,18 @@ function station(i){
   s.message=correct?'Richtig. '+q.explanation:s.done?'Lösung: '+q.explanation:'Tipp: '+q.hint;
   station(i);
  }
- document.querySelector('#check').onclick=()=>{
-  const values=state[i][4].values;
-  if(qs[4].answer.some((_,j)=>!Number.isFinite(parse(values[j])))){state[i][4].message='Trage in alle drei Felder eine Zahl ein.';station(i);return;}
-  check(4,qs[4].answer.every((v,j)=>Math.abs(v-parse(values[j]))<.00001));
- };
- document.querySelector('#calculator').onclick=()=>{
-  const q=qs[4];
-  zoom.innerHTML='<button data-close>Schließen</button><h2>Rechner</h2><p>'+(q.formula==='%'?'Prozentwert ÷ Grundwert × 100':q.formula==='+'?'Erster Betrag + zweiter Betrag':'Späterer Betrag − früherer Betrag')+'</p><label>'+q.labels[0]+' <input id="a" inputmode="decimal"></label><label>'+q.labels[1]+' <input id="b" inputmode="decimal"></label>'+(q.twoPeriods?'<label>'+q.labels[3]+' <input id="reference-2015" inputmode="decimal"></label>':'')+'<button id="calculate">Berechnen</button><output id="result" aria-live="polite"></output>';
+ taskbody.querySelectorAll('[data-check]').forEach(button=>button.onclick=()=>{
+  const k=+button.dataset.check,q=qs[k],answerState=state[i][k];
+  if(q.answer.some((_,j)=>!Number.isFinite(parse(answerState.values[j])))){
+   answerState.message='Trage in jedes Feld eine Zahl ein.';
+   station(i);
+   return;
+  }
+  check(k,q.answer.every((value,j)=>Math.abs(value-parse(answerState.values[j]))<.00001));
+ });
+ taskbody.querySelectorAll('[data-calculator]').forEach(button=>button.onclick=()=>{
+  const q=qs[+button.dataset.calculator];
+  zoom.innerHTML='<button data-close>Schließen</button><h2>Rechner</h2><p>'+(q.formula==='%'?'Prozentwert ÷ Grundwert × 100':q.formula==='+'?'Erster Betrag + zweiter Betrag':'Erster Betrag − zweiter Betrag')+'</p><label>'+q.labels[0]+' <input id="a" inputmode="decimal"></label><label>'+q.labels[1]+' <input id="b" inputmode="decimal"></label>'+(q.twoPeriods?'<label>'+q.labels[3]+' <input id="reference-2015" inputmode="decimal"></label>':'')+'<button id="calculate">Berechnen</button><output id="result" aria-live="polite"></output>';
   openDialog();
   zoom.querySelector('#calculate').onclick=()=>{
    const a=parse(zoom.querySelector('#a').value),b=parse(zoom.querySelector('#b').value);
@@ -194,8 +210,8 @@ function station(i){
    const result=q.formula==='%'?a/b*100:q.formula==='+'?a+b:a-b;
    zoom.querySelector('#result').textContent=Number.isFinite(result)?' Ergebnis: '+num(result)+(q.formula==='%'?' %':' Mrd. €'):' Bitte zwei gültige Zahlen eingeben.';
   };
- };
- document.querySelector('#reset').onclick=()=>{state[i]=Array.from({length:5},()=>({tries:0,done:false,selected:'',values:[],message:''}));station(i)};
+ });
+ document.querySelector('#reset').onclick=()=>{state[i]=emptyStation();station(i)};
 }
 home();
 </script></html>
